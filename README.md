@@ -130,6 +130,38 @@ git push --follow-tags     # triggers the release-dmg workflow
 downloadable build artifact without a release.) No secret needed — it uses the
 built-in `GITHUB_TOKEN`.
 
+#### Code signing + notarization (optional)
+
+With an Apple Developer account, the DMG can be signed and notarized so it
+opens with no Gatekeeper warning. Signing turns on automatically once these
+**six repo secrets** exist (otherwise the build stays unsigned):
+
+| Secret | What it is |
+|---|---|
+| `CSC_LINK` | base64 of your **Developer ID Application** `.p12` |
+| `CSC_KEY_PASSWORD` | the password you set when exporting that `.p12` |
+| `APPLE_API_KEY_P8_BASE64` | base64 of an App Store Connect API key `.p8` |
+| `APPLE_API_KEY_ID` | that key's **Key ID** |
+| `APPLE_API_ISSUER` | that key's **Issuer ID** (a UUID) |
+| `APPLE_TEAM_ID` | your 10-character Developer **Team ID** |
+
+Get the cert from Xcode (Settings → Accounts → Manage Certificates → +
+**Developer ID Application**) or developer.apple.com, export it as `.p12` from
+Keychain Access. Create the API key at App Store Connect → Users and Access →
+**Integrations → App Store Connect API** (Developer access). Then:
+
+```bash
+base64 -i DeveloperID.p12 | gh secret set CSC_LINK --repo shaksphere/babymash
+base64 -i AuthKey_XXXX.p8 | gh secret set APPLE_API_KEY_P8_BASE64 --repo shaksphere/babymash
+gh secret set CSC_KEY_PASSWORD --repo shaksphere/babymash   # paste when prompted
+gh secret set APPLE_API_KEY_ID --repo shaksphere/babymash   # e.g. ABC123XYZ9
+gh secret set APPLE_API_ISSUER --repo shaksphere/babymash   # the UUID
+gh secret set APPLE_TEAM_ID    --repo shaksphere/babymash   # e.g. AB12CD34EF
+```
+
+The config lives in [`electron-builder.cjs`](./electron-builder.cjs); hardened
+runtime entitlements are in [`build/entitlements.mac.plist`](./build/entitlements.mac.plist).
+
 ## Tech
 
 React + TypeScript + Vite · HTML Canvas · WebAudio API · Fullscreen + Keyboard Lock APIs · Firebase Hosting + Firestore (optional).
