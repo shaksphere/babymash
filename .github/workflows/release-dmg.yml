@@ -1,0 +1,44 @@
+name: Build macOS DMG
+
+# Builds the Electron desktop app and attaches the .dmg(s) to a GitHub Release.
+# Trigger by pushing a tag, e.g.:
+#   git tag v1.0.0 && git push origin v1.0.0
+# Or run manually from the Actions tab (workflow_dispatch) to just build artifacts.
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build_dmg:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+
+      - name: Build unsigned DMG
+        run: npm run electron:build
+        env:
+          # No Apple Developer cert in CI → build unsigned (don't try to sign).
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+
+      - name: Upload DMG as build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: babymash-macos-dmg
+          path: release/*.dmg
+
+      - name: Attach DMG to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release/*.dmg
+          generate_release_notes: true
