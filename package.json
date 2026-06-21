@@ -1,7 +1,7 @@
 {
   "name": "babymash",
   "private": true,
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "A safe baby keyboard smasher with animations, sounds, and shortcut/gesture blocking.",
   "author": "shaksphere",
   "type": "module",
