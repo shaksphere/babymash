@@ -26,6 +26,9 @@ env:
 jobs:
   build_dmg:
     runs-on: macos-latest
+    # Notarization can wait on Apple's notary service for a long time; give the
+    # whole job plenty of headroom so the retry wrapper can do its job.
+    timeout-minutes: 300
     env:
       # The `secrets` context can't be used in `if:` conditions, so mirror the
       # one we branch on into env (booleans become the strings 'true'/'false').
@@ -53,10 +56,18 @@ jobs:
           echo "$APPLE_API_KEY_P8_BASE64" | base64 --decode > "$RUNNER_TEMP/api_key.p8"
           echo "APPLE_API_KEY=$RUNNER_TEMP/api_key.p8" >> "$GITHUB_ENV"
 
+      # Wrapped in a retry: notarization polls Apple over a long window, and a
+      # momentary network blip on the runner (NSURLError -1009) shouldn't throw
+      # away an otherwise-good signed build. Each attempt re-signs and submits.
       - name: Build DMG (signed + notarized when secrets are present)
-        # --publish never: we attach the DMG ourselves below, so electron-builder
-        # must not try to publish to GitHub (which would need a token).
-        run: npx electron-builder --publish never
+        uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 90
+          max_attempts: 3
+          retry_wait_seconds: 60
+          # --publish never: we attach the DMG ourselves below, so electron-builder
+          # must not try to publish to GitHub (which would need a token).
+          command: npx electron-builder --publish never
         env:
           # Code signing — electron-builder imports the .p12 from CSC_LINK (base64).
           # When CSC_LINK is empty, auto-discovery is disabled => unsigned build.
