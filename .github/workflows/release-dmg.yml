@@ -16,6 +16,10 @@ permissions:
 jobs:
   build_dmg:
     runs-on: macos-latest
+    env:
+      # The `secrets` context can't be used in `if:` conditions, so mirror the
+      # one we branch on into env (booleans become the strings 'true'/'false').
+      HAS_APPLE_KEY: ${{ secrets.APPLE_API_KEY_P8_BASE64 != '' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -30,7 +34,7 @@ jobs:
       # Write the App Store Connect API key (.p8) to a file for notarytool.
       # Only runs when the secret exists; otherwise the build stays unsigned.
       - name: Prepare notarization API key
-        if: ${{ secrets.APPLE_API_KEY_P8_BASE64 != '' }}
+        if: env.HAS_APPLE_KEY == 'true'
         env:
           # Pass via env (not inline ${{ }}) so the value is never expanded into
           # the shell command line. GitHub masks secrets in logs regardless.
