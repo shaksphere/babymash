@@ -78,11 +78,9 @@ function createWindow() {
   win = new BrowserWindow({
     width,
     height,
-    kiosk: lockdown, // full kiosk lockdown in production
-    fullscreen: lockdown,
+    show: false, // shown explicitly on ready-to-show so it never "launches invisibly"
     frame: false,
     backgroundColor: '#1a1a40',
-    alwaysOnTop: lockdown,
     autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.cjs'),
@@ -91,10 +89,20 @@ function createWindow() {
     },
   });
 
-  if (lockdown) {
-    win.setAlwaysOnTop(true, 'screen-saver');
-    win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
-  }
+  // Show the window once content is ready, then lock down. We use *simple*
+  // fullscreen so the app fills the CURRENT screen immediately, instead of
+  // macOS native fullscreen which slides off to a separate Space the user then
+  // has to go find (the "app opened but I can't see it" symptom).
+  win.once('ready-to-show', () => {
+    win.show();
+    win.focus();
+    if (lockdown) {
+      win.setSimpleFullScreen(true);
+      win.setAlwaysOnTop(true, 'screen-saver');
+      win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+      app.focus({ steal: true });
+    }
+  });
 
   // Count ESC presses in the main process so quitting is authoritative, while
   // the web UI still shows its "press ESC X more times" overlay. We do NOT
