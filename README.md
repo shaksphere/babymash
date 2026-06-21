@@ -78,6 +78,20 @@ firebase deploy                 # hosting + firestore rules
 
 Firestore security rules (`firestore.rules`) lock the global doc down to *increment-only* on a single `mashes` field — no auth required, but it can't be vandalised with arbitrary writes.
 
+## Continuous deployment (GitHub Actions)
+
+`.github/workflows/firebase-deploy.yml` deploys to the live channel on every
+push to `main`, and spins up an ephemeral preview channel for each pull request.
+
+It needs **one** repo secret — a Firebase service account:
+
+1. Firebase Console → **Project settings → Service accounts → Generate new private key**.
+2. GitHub repo → **Settings → Secrets and variables → Actions → New repository secret**.
+3. Name it `FIREBASE_SERVICE_ACCOUNT_BABYMASH_APP`, paste the whole JSON.
+
+(Or run `firebase init hosting:github` once, which creates the service account
+and sets the secret for you.)
+
 ## Tech
 
 React + TypeScript + Vite · HTML Canvas · WebAudio API · Fullscreen + Keyboard Lock APIs · Firebase Hosting + Firestore (optional).
