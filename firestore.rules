@@ -1,0 +1,17 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // The single global mash counter: anyone may read, and may only ever
+    // increment the `mashes` field (no overwrites, deletes, or other fields).
+    match /stats/global {
+      allow read: if true;
+      allow create: if request.resource.data.keys().hasOnly(['mashes'])
+                    && request.resource.data.mashes is number;
+      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['mashes'])
+                    && request.resource.data.mashes is number
+                    && request.resource.data.mashes >= resource.data.mashes
+                    && request.resource.data.mashes <= resource.data.mashes + 100000;
+      allow delete: if false;
+    }
+  }
+}
