@@ -45,6 +45,16 @@ const SHORTCUTS = [
   'Control+Right',
   'F1', 'F2', 'F3', 'F4', 'F5', 'F6',
   'F7', 'F8', 'F9', 'F10', 'F11', 'F12',
+  // Top-row media keys (when in their default "media mode"). These are the only
+  // system-defined keys Electron can grab; brightness and Mission Control /
+  // Launchpad are owned by the OS and can't be registered (see README).
+  'MediaPlayPause',
+  'MediaNextTrack',
+  'MediaPreviousTrack',
+  'MediaStop',
+  'VolumeUp',
+  'VolumeDown',
+  'VolumeMute',
 ];
 
 function registerBlockers() {

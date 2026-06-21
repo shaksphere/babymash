@@ -81,20 +81,32 @@ Firestore security rules (`firestore.rules`) lock the global doc down to *increm
 ## Desktop app (macOS) — stronger lockdown
 
 The web version can't touch OS-level shortcuts. The bundled **Electron** app can:
-it runs in kiosk mode and uses `globalShortcut` to swallow **Cmd+Space
-(Spotlight)**, the **F-keys**, **Cmd+W/T/N/R/Q/H/M**, and the keyboard
-Mission-Control / Spaces combos. Triple-tap **ESC** quits (set
+it runs in fullscreen and uses `globalShortcut` to swallow **Cmd+Space
+(Spotlight)**, the **F-keys**, **Cmd+W/T/N/R/Q/H/M**, the keyboard
+Mission-Control / Spaces combos, and the top-row **media + volume keys**
+(play/pause, next, prev, volume). Triple-tap **ESC** quits (set
 `BABYMASH_EXIT_PRESSES` to change the count).
 
 ```bash
 npm run electron:dev     # run the desktop app against the Vite dev server
-npm run electron:build   # produce a signed-less .dmg in release/
+npm run electron:build   # produce a .dmg in release/
 ```
 
-The only thing even the desktop app can't intercept is the **3/4-finger
-trackpad swipe** between Spaces (a WindowServer gesture) — turn it off once in
-**System Settings → Trackpad → More Gestures** (see above). For a *hardware*
-baby-lock with zero gestures, an **iPad in Guided Access** is unbeatable.
+### What the desktop app still can't block (and why)
+
+A few top-row/gesture inputs are owned by the OS at a level below any app, so
+they need a one-time **System Settings** change rather than code:
+
+- **Mission Control / desktop picker (F3), Launchpad (F4), Show Desktop** —
+  uncheck them in **System Settings → Keyboard → Keyboard Shortcuts → Mission
+  Control**.
+- **Brightness up/down** — no userspace API can reliably intercept these on
+  modern macOS; there's no per-app block.
+- **3/4-finger trackpad swipe** between Spaces — turn off in **System Settings →
+  Trackpad → More Gestures**.
+
+For a *hardware* baby-lock with zero of these caveats, an **iPad in Guided
+Access** is unbeatable.
 
 > First launch: the `.dmg` is unsigned, so right-click the app → **Open** the
 > first time (or `xattr -dr com.apple.quarantine /Applications/BabyMash.app`).
