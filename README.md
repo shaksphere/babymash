@@ -113,6 +113,23 @@ It needs **one** repo secret — a Firebase service account:
 (Or run `firebase init hosting:github` once, which creates the service account
 and sets the secret for you.)
 
+Until that secret exists the deploy step is **skipped** (the run stays green) —
+the web build itself still runs on every push.
+
+### macOS DMG releases
+
+`.github/workflows/release-dmg.yml` builds the unsigned desktop `.dmg` and
+attaches it to a GitHub Release. Push a tag to cut a release:
+
+```bash
+npm version patch          # bumps package.json + creates a git tag
+git push --follow-tags     # triggers the release-dmg workflow
+```
+
+(Or run it from the **Actions** tab via "Run workflow" to just produce a
+downloadable build artifact without a release.) No secret needed — it uses the
+built-in `GITHUB_TOKEN`.
+
 ## Tech
 
 React + TypeScript + Vite · HTML Canvas · WebAudio API · Fullscreen + Keyboard Lock APIs · Firebase Hosting + Firestore (optional).
