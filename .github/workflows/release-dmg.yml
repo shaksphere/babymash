@@ -31,8 +31,12 @@ jobs:
       # Only runs when the secret exists; otherwise the build stays unsigned.
       - name: Prepare notarization API key
         if: ${{ secrets.APPLE_API_KEY_P8_BASE64 != '' }}
+        env:
+          # Pass via env (not inline ${{ }}) so the value is never expanded into
+          # the shell command line. GitHub masks secrets in logs regardless.
+          APPLE_API_KEY_P8_BASE64: ${{ secrets.APPLE_API_KEY_P8_BASE64 }}
         run: |
-          echo "${{ secrets.APPLE_API_KEY_P8_BASE64 }}" | base64 --decode > "$RUNNER_TEMP/api_key.p8"
+          echo "$APPLE_API_KEY_P8_BASE64" | base64 --decode > "$RUNNER_TEMP/api_key.p8"
           echo "APPLE_API_KEY=$RUNNER_TEMP/api_key.p8" >> "$GITHUB_ENV"
 
       - name: Build DMG (signed + notarized when secrets are present)

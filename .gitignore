@@ -23,6 +23,15 @@ release
 firebase-debug.log*
 firestore-debug.log*
 
+# Signing material — never commit certs/keys (they live outside the repo anyway)
+*.p12
+*.p8
+*.cer
+*.pem
+*.mobileprovision
+*.certSigningRequest
+AuthKey_*
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
