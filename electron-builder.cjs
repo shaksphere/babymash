@@ -34,10 +34,10 @@ module.exports = {
           gatekeeperAssess: false,
           entitlements: 'build/entitlements.mac.plist',
           entitlementsInherit: 'build/entitlements.mac.plist',
-          // notarytool via App Store Connect API key. teamId comes from env.
-          notarize: process.env.APPLE_TEAM_ID
-            ? { teamId: process.env.APPLE_TEAM_ID }
-            : true,
+          // notarytool via App Store Connect API key (APPLE_API_KEY / _ID /
+          // _ISSUER env). In electron-builder 26 this must be a boolean; the
+          // Team ID is taken from the APPLE_TEAM_ID env var.
+          notarize: true,
         }
       : {}),
   },
