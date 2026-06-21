@@ -78,6 +78,27 @@ firebase deploy                 # hosting + firestore rules
 
 Firestore security rules (`firestore.rules`) lock the global doc down to *increment-only* on a single `mashes` field — no auth required, but it can't be vandalised with arbitrary writes.
 
+## Desktop app (macOS) — stronger lockdown
+
+The web version can't touch OS-level shortcuts. The bundled **Electron** app can:
+it runs in kiosk mode and uses `globalShortcut` to swallow **Cmd+Space
+(Spotlight)**, the **F-keys**, **Cmd+W/T/N/R/Q/H/M**, and the keyboard
+Mission-Control / Spaces combos. Triple-tap **ESC** quits (set
+`BABYMASH_EXIT_PRESSES` to change the count).
+
+```bash
+npm run electron:dev     # run the desktop app against the Vite dev server
+npm run electron:build   # produce a signed-less .dmg in release/
+```
+
+The only thing even the desktop app can't intercept is the **3/4-finger
+trackpad swipe** between Spaces (a WindowServer gesture) — turn it off once in
+**System Settings → Trackpad → More Gestures** (see above). For a *hardware*
+baby-lock with zero gestures, an **iPad in Guided Access** is unbeatable.
+
+> First launch: the `.dmg` is unsigned, so right-click the app → **Open** the
+> first time (or `xattr -dr com.apple.quarantine /Applications/BabyMash.app`).
+
 ## Continuous deployment (GitHub Actions)
 
 `.github/workflows/firebase-deploy.yml` deploys to the live channel on every
