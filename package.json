@@ -1,14 +1,38 @@
 {
   "name": "babymash",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
+  "main": "electron/main.cjs",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "og": "node scripts/gen-og.mjs"
+    "og": "node scripts/gen-og.mjs",
+    "electron:dev": "concurrently -k \"vite\" \"wait-on tcp:5173 && ELECTRON_START_URL=http://localhost:5173 electron .\"",
+    "electron:build": "npm run build && electron-builder",
+    "electron:dir": "npm run build && electron-builder --dir"
+  },
+  "build": {
+    "appId": "app.babymash.desktop",
+    "productName": "BabyMash",
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "dist/**",
+      "electron/**",
+      "package.json"
+    ],
+    "mac": {
+      "category": "public.app-category.entertainment",
+      "target": [
+        { "target": "dmg", "arch": ["arm64", "x64"] }
+      ],
+      "icon": "build/icon.png"
+    }
   },
   "dependencies": {
     "firebase": "^12.15.0",
@@ -22,12 +46,16 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
+    "concurrently": "^10.0.3",
+    "electron": "^42.4.1",
+    "electron-builder": "^26.15.3",
     "eslint": "^10.3.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.6.0",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.59.2",
-    "vite": "^8.0.12"
+    "vite": "^8.0.12",
+    "wait-on": "^9.0.10"
   }
 }
