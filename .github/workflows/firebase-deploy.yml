@@ -1,0 +1,57 @@
+name: Deploy to Firebase Hosting
+
+# Auto-deploys to https://babymash-app.web.app on every push to main.
+# Pull requests get an ephemeral Firebase preview channel.
+#
+# One-time setup (creates the service-account secret used below):
+#   firebase init hosting:github
+# ...or add the secret FIREBASE_SERVICE_ACCOUNT_BABYMASH_APP manually
+# (Firebase console → Project settings → Service accounts → Generate key).
+#
+# The VITE_FIREBASE_* values below are the *web* SDK config, which Firebase
+# intends to be public (they're embedded in the client bundle anyway), so it's
+# safe to keep them in this file. Move them to repo Variables if you prefer.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  VITE_FIREBASE_API_KEY: AIzaSyA08xHbid01aUvD9PZziTGee_IU1OEuu1s
+  VITE_FIREBASE_AUTH_DOMAIN: babymash-app.firebaseapp.com
+  VITE_FIREBASE_PROJECT_ID: babymash-app
+  VITE_FIREBASE_STORAGE_BUCKET: babymash-app.firebasestorage.app
+  VITE_FIREBASE_MESSAGING_SENDER_ID: "607627872958"
+  VITE_FIREBASE_APP_ID: "1:607627872958:web:8971351428a2427766ecef"
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+
+      # Production deploy on push to main
+      - name: Deploy to live channel
+        if: github.event_name == 'push'
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BABYMASH_APP }}
+          projectId: babymash-app
+          channelId: live
+
+      # Preview deploy for pull requests
+      - name: Deploy preview channel
+        if: github.event_name == 'pull_request'
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BABYMASH_APP }}
+          projectId: babymash-app
