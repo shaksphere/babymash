@@ -24,8 +24,13 @@ jobs:
           cache: npm
       - run: npm ci
 
+      - name: Build web assets
+        run: npm run build
+
       - name: Build unsigned DMG
-        run: npm run electron:build
+        # --publish never: we attach the DMG ourselves below, so electron-builder
+        # must not try to publish to GitHub (which would need a token).
+        run: npx electron-builder --publish never
         env:
           # No Apple Developer cert in CI → build unsigned (don't try to sign).
           CSC_IDENTITY_AUTO_DISCOVERY: false
